@@ -1,0 +1,26 @@
+{
+    "metrics": {
+        "MAE": 3.6492466030322293,
+        "RMSE": 4.972661903826628,
+        "MAPE": 1.9408848567896688
+    },
+    "timestamp": "2024-12-03T23:31:04.665269",
+    "interpretation": {
+        "MAE": "Average absolute difference between predicted and actual values",
+        "RMSE": "Root mean square error (penalizes larger errors more heavily)",
+        "MAPE": "Average percentage difference between predicted and actual values"
+    },
+    "summary": {
+        "MAE": "3.65",
+        "RMSE": "4.97",
+        "MAPE": "1.94%"
+    },
+    "performance_assessment": {
+        "overall_performance": "Good",
+        "recommendations": [
+            "Consider increasing training data if performance is poor",
+            "Adjust model hyperparameters if error is high",
+            "Review feature selection if predictions are off"
+        ]
+    }
+}
