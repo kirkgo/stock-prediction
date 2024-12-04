@@ -7,7 +7,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PYTHONPATH=/app \
-    DEBIAN_FRONTEND=noninteractive
+    DEBIAN_FRONTEND=noninteractive \
+    PATH="/home/appuser/.local/bin:${PATH}"  # Adicionando o path do usuário
 
 # Set working directory
 WORKDIR /app
@@ -26,7 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# Create non-root user first (antes de instalar as dependências)
+# Create non-root user and set up directories
 RUN useradd -m -u 1000 appuser \
     && mkdir -p /app/models/saved_models /app/models/checkpoints \
     && chown -R appuser:appuser /app
@@ -38,7 +39,8 @@ USER appuser
 COPY --chown=appuser:appuser requirements.txt .
 
 # Install Python packages
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN pip install --no-cache-dir --user -r requirements.txt \
+    && pip install --no-cache-dir --user uvicorn
 
 # Copy project files (with appropriate ownership)
 COPY --chown=appuser:appuser . .
