@@ -7,9 +7,9 @@
 - Kirk Patrick (MLET1 - Grupo 66)
 - Você pode entrar em contato com o autor pelo LinkedIn: [https://www.linkedin.com/in/kirkgo/](https://www.linkedin.com/in/kirkgo/)
 
-## Link do Video
+## Video de Apresentação do Trabalho
 
-[Vídeo de Apresentação](https://www.linkedin.com/in/kirkgo/)
+Link do Vídeo: [https://youtu.be/bga5UosNMC4](https://youtu.be/bga5UosNMC4)
 
 # Documentação do Projeto Stock Prediction
 
