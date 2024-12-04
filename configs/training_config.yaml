@@ -1,15 +1,15 @@
 training:
   start_date: '2018-01-01'
   end_date: '2024-07-20'
-  epochs: 100
-  batch_size: 32
+  epochs: 200
+  batch_size: 64
   validation_split: 0.2
-  early_stopping_patience: 10
+  early_stopping_patience: 20
 
 model:
-  sequence_length: 60
-  lstm_units: [50, 50, 50]
-  dropout_rate: 0.2
+  sequence_length: 30
+  lstm_units: [128, 64]
+  dropout_rate: 0.1
   learning_rate: 0.001
 
 data:

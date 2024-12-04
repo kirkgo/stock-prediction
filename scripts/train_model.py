@@ -11,6 +11,11 @@ import os
 import numpy as np
 import pandas as pd
 from src.utils import evaluation
+from src.utils.evaluation import (
+    plot_training_metrics,
+    plot_prediction_analysis,
+    generate_metrics_report
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -109,26 +114,12 @@ def main():
     parser = argparse.ArgumentParser(
         description='Treina o modelo LSTM para previsão de ações')
 
-    parser.add_argument(
-        '--symbol',
-        type=str,
-        default='AAPL',
-        help='Símbolo da ação (ex: AAPL)'
-    )
-
-    parser.add_argument(
-        '--config',
-        type=str,
-        default='configs/training_config.yaml',
-        help='Caminho para o arquivo de configuração'
-    )
-
-    parser.add_argument(
-        '--output-dir',
-        type=str,
-        default='models/saved_models',
-        help='Diretório para salvar o modelo treinado'
-    )
+    parser.add_argument('--symbol', type=str, default='AAPL',
+                        help='Símbolo da ação (ex: AAPL)')
+    parser.add_argument('--config', type=str, default='configs/training_config.yaml',
+                        help='Caminho para o arquivo de configuração')
+    parser.add_argument('--output-dir', type=str, default='models/saved_models',
+                        help='Diretório para salvar o modelo treinado')
 
     args = parser.parse_args()
     logger.info(f"Argumentos recebidos: symbol={args.symbol}, config={
@@ -136,19 +127,9 @@ def main():
 
     try:
         # Carrega configurações
-        logger.info("Carregando configurações...")
         config = load_config(args.config)
 
         logger.info(f"Iniciando treinamento para {args.symbol}")
-        logger.info(f"Período de treinamento: {config['training']['start_date']} até {
-                    config['training']['end_date']}")
-
-        # Cria diretório de saída
-        logger.info(f"Criando diretório de saída: {args.output_dir}")
-        Path(args.output_dir).mkdir(parents=True, exist_ok=True)
-
-        # Inicializa o modelo
-        logger.info("Inicializando StockPredictor...")
         predictor = StockPredictor(
             symbol=args.symbol,
             start_date=config['training']['start_date'],
@@ -165,43 +146,60 @@ def main():
         )
         logger.info("Treinamento concluído")
 
-        # Plota histórico
-        logger.info("Gerando visualizações do treinamento...")
-        plot_training_history(history, args.output_dir)
+        # --- AQUI COMEÇAM AS CHAMADAS PARA GERAÇÃO DOS RELATÓRIOS ---
 
-        # Avalia o modelo
+        # Gera visualizações do treinamento
+        logger.info("Gerando visualizações do histórico de treinamento...")
+        training_plots_path = plot_training_metrics(
+            history.history, args.output_dir)
+        logger.info(f"Visualizações do treinamento salvas em: {
+                    training_plots_path}")
+
+        # Avalia o modelo e gera predições
         logger.info("Avaliando o modelo...")
         data = predictor.fetch_data()
         _, X_test, _, y_test = predictor.prepare_sequences(data)
         metrics = predictor.evaluate(X_test, y_test)
 
-        logger.info("Métricas de avaliação:")
-        for metric, value in metrics.items():
-            logger.info(f"{metric}: {value:.4f}")
-
-        # Salvar relatório de métricas
-        logger.info("Salvando relatório de métricas...")
-        report_path = evaluation.save_metrics_report(
-            metrics, args.output_dir)
-        logger.info(f"Relatório de métricas salvo em: {report_path}")
-
-        # Plotar gráficos de avaliação
-        logger.info("Plotando gráficos de avaliação...")
         predictions = predictor.model.predict(X_test).flatten()
         y_test_inv = predictor.scaler.inverse_transform(
             np.concatenate(
                 [y_test.reshape(-1, 1), np.zeros((len(y_test), 4))], axis=1)
         )[:, 0]
+
+        # Gera datas para o período de teste
         dates = pd.date_range(
-            start=config['training']['start_date'], periods=len(y_test), freq='D')
-        plot_path = evaluation.plot_metrics(
-            predictions, y_test_inv, dates, args.output_dir)
-        logger.info(f"Gráficos de avaliação salvos em: {plot_path}")
+            start=config['training']['start_date'],
+            periods=len(y_test),
+            freq='D'
+        )
+
+        # Gera análise visual das predições
+        logger.info("Gerando análise visual das predições...")
+        prediction_plots_path = plot_prediction_analysis(
+            predictions,
+            y_test_inv,
+            dates,
+            args.output_dir
+        )
+        logger.info(f"Análise visual das predições salva em: {
+                    prediction_plots_path}")
+
+        # Gera relatório completo de métricas
+        logger.info("Gerando relatório de métricas...")
+        report_path = generate_metrics_report(
+            metrics,
+            predictions,
+            y_test_inv,
+            args.output_dir
+        )
+        logger.info(f"Relatório de métricas salvo em: {report_path}")
+
+        # --- FIM DAS CHAMADAS DE RELATÓRIO ---
 
         # Salva o modelo
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        model_path = f"{
-            args.output_dir}/{args.symbol}_model_{timestamp}.keras"
+        model_path = f"{args.output_dir}/{args.symbol}_model_{timestamp}.keras"
         logger.info(f"Salvando modelo em: {model_path}")
         predictor.save_model(model_path)
 
@@ -214,91 +212,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# def main():
-#     logger.info("Iniciando função principal...")
-#     parser = argparse.ArgumentParser(
-#         description='Treina o modelo LSTM para previsão de ações')
-
-#     parser.add_argument(
-#         '--symbol',
-#         type=str,
-#         default='AAPL',
-#         help='Símbolo da ação (ex: AAPL)'
-#     )
-
-#     parser.add_argument(
-#         '--config',
-#         type=str,
-#         default='configs/training_config.yaml',
-#         help='Caminho para o arquivo de configuração'
-#     )
-
-#     parser.add_argument(
-#         '--output-dir',
-#         type=str,
-#         default='models/saved_models',
-#         help='Diretório para salvar o modelo treinado'
-#     )
-
-#     args = parser.parse_args()
-#     logger.info(f"Argumentos recebidos: symbol={args.symbol}, config={
-#                 args.config}, output_dir={args.output_dir}")
-
-#     try:
-#         logger.info("Carregando configurações...")
-#         config = load_config(args.config)
-
-#         logger.info(f"Iniciando treinamento para {args.symbol}")
-#         logger.info(f"Período de treinamento: {config['training']['start_date']} até {
-#                     config['training']['end_date']}")
-
-#         logger.info(f"Criando diretório de saída: {args.output_dir}")
-#         Path(args.output_dir).mkdir(parents=True, exist_ok=True)
-
-#         logger.info("Inicializando StockPredictor...")
-#         predictor = StockPredictor(
-#             symbol=args.symbol,
-#             start_date=config['training']['start_date'],
-#             end_date=config['training']['end_date']
-#         )
-
-#         logger.info(f"Iniciando treinamento com {
-#                     config['training']['epochs']} épocas...")
-#         history = predictor.train(
-#             epochs=config['training']['epochs'],
-#             batch_size=config['training']['batch_size'],
-#             seq_length=config['model']['sequence_length']
-#         )
-#         logger.info("Treinamento concluído")
-
-#         logger.info("Gerando visualizações do treinamento...")
-#         plot_training_history(history, args.output_dir)
-
-#         logger.info("Avaliando o modelo...")
-#         data = predictor.fetch_data()
-#         _, X_test, _, y_test = predictor.prepare_sequences(data)
-#         metrics = predictor.evaluate(X_test, y_test)
-
-#         logger.info("Métricas de avaliação:")
-#         for metric, value in metrics.items():
-#             logger.info(f"{metric}: {value:.4f}")
-
-#         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-#         model_path = f"{args.output_dir}/{args.symbol}_model_{timestamp}.keras"
-#         logger.info(f"Salvando modelo em: {model_path}")
-#         predictor.save_model(model_path)
-
-#         logger.info("Fazendo predições de teste...")
-#         predictions = predictor.predict(days=30)
-#         logger.info(f"Primeiras 5 predições: {predictions[:5]}")
-
-#         logger.info("Script finalizado com sucesso!")
-
-#     except Exception as e:
-#         logger.error(f"Erro durante a execução: {str(e)}", exc_info=True)
-#         sys.exit(1)
-
-
-# if __name__ == "__main__":
-#     main()

@@ -10,6 +10,12 @@ __pycache__/
 # C extensions
 *.so
 
+#  model
+models/checkpoints/*.keras
+models/saved_models/*.keras
+models/saved_models/*.png
+models/saved_models/*.json
+
 # Distribution / packaging
 .Python
 build/

@@ -134,33 +134,6 @@ class StockPredictor:
             'MAPE': mape
         }
 
-    # def predict(self, days=30):
-    #     """Predict future stock prices"""
-    #     logger.info(f"Predicting next {days} days")
-
-    #     data = self.fetch_data()
-    #     last_sequence = data[-60:]
-
-    #     predictions = []
-    #     current_sequence = last_sequence.copy()
-
-    #     for _ in range(days):
-    #         current_batch = current_sequence[-60:].reshape((1, 60, 5))
-
-    #         next_pred = self.model.predict(current_batch)[0]
-    #         predictions.append(next_pred[0])
-
-    #         new_row = np.zeros((1, 5))
-    #         new_row[0, 0] = next_pred[0]
-    #         current_sequence = np.vstack([current_sequence, new_row])
-
-    #     predictions = np.array(predictions).reshape(-1, 1)
-    #     predictions = self.scaler.inverse_transform(
-    #         np.concatenate([predictions, np.zeros(
-    #             (len(predictions), 4))], axis=1)
-    #     )[:, 0]
-
-    #     return predictions
     def predict(self, days=30):
         """Predict future stock prices"""
         if self.model is None:
@@ -191,14 +164,6 @@ class StockPredictor:
         )[:, 0]
 
         return predictions
-
-    # def save_model(self, filepath):
-    #     """Save the model"""
-    #     if self.model is not None:
-    #         self.model.save(filepath)
-    #         logger.info(f"Model saved to {filepath}")
-    #     else:
-    #         logger.error("No model to save")
 
     def save_model(self, filepath):
         """Save the model"""
