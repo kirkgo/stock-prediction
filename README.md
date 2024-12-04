@@ -7,6 +7,12 @@
 - Kirk Patrick (MLET1 - Grupo 66)
 - Você pode entrar em contato com o autor pelo LinkedIn: [https://www.linkedin.com/in/kirkgo/](https://www.linkedin.com/in/kirkgo/)
 
+## Link do Video
+
+[Vídeo de Apresentação](https://www.linkedin.com/in/kirkgo/)
+
+# Documentação do Projeto Stock Prediction
+
 ## Sumário
 - [Visão Geral](#visão-geral)
 - [Requisitos](#requisitos)
@@ -459,16 +465,139 @@ RUN useradd -m -u 1000 appuser \
 
 ## Troubleshooting
 
+### Sistema de Monitoramento
+
+## Configuração do Grafana
+
+### Estrutura de Diretórios
+```
+configs/
+└── grafana/
+    ├── provisioning/
+    │   ├── dashboards/
+    │   │   └── dashboard.yml
+    │   └── datasources/
+    │       └── datasource.yml
+    └── dashboards/
+        └── stock_prediction_dashboard.json
+```
+
+### Datasources
+O Prometheus é configurado como fonte de dados padrão através do arquivo `datasource.yml`:
+```yaml
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+```
+
+### Dashboard Principal
+O dashboard principal inclui:
+
+1. **Métricas de Predição**
+   - Tempo de processamento
+   - Total de predições realizadas
+   - Gráfico temporal de performance
+
+2. **Métricas do Modelo**
+   - Taxa de erro
+   - Tempo de treinamento
+   - Performance em tempo real
+
+3. **Métricas do Sistema**
+   - Uso de CPU e memória
+   - Latência da API
+   - Status dos containers
+
+### Acesso ao Grafana
+- URL: http://localhost:3000
+- Credenciais padrão:
+  - Usuário: admin
+  - Senha: admin
+
+### Personalização
+1. Acesse o Grafana Dashboard
+2. Clique em "Edit" no dashboard desejado
+3. Adicione ou modifique painéis
+4. Configure alertas se necessário
+5. Salve as alterações
+
+## Troubleshooting
+
 ### Problemas Comuns
 
-1. Erro ao carregar modelo:
+1. **Erro ao carregar modelo:**
    - Verifique se existe um modelo treinado em `models/saved_models`
    - Verifique as permissões dos arquivos
+   - Logs: `docker logs stock-prediction-api`
 
-2. Erro de memória durante treinamento:
+2. **Erro de memória durante treinamento:**
    - Ajuste o `batch_size` no arquivo de configuração
    - Verifique os limites de recursos no Docker
+   - Monitore através do Grafana
 
-3. API indisponível:
-   - Verifique logs do container: `docker logs stock-prediction-api`
+3. **API indisponível:**
+   - Verifique logs: `docker logs stock-prediction-api`
    - Verifique o status do healthcheck
+   - Consulte métricas no Grafana
+
+4. **Grafana/Prometheus não inicializa:**
+   - Verifique se as portas estão disponíveis
+   - Confirme as permissões dos volumes
+   - Verifique a configuração do datasource
+
+### Verificação de Logs
+
+1. **Logs da API:**
+```bash
+docker logs stock-prediction-api
+```
+
+2. **Logs do Prometheus:**
+```bash
+docker logs prometheus
+```
+
+3. **Logs do Grafana:**
+```bash
+docker logs grafana
+```
+
+### Reinicialização de Serviços
+
+1. **Reiniciar todos os serviços:**
+```bash
+docker-compose down
+docker-compose up -d
+```
+
+2. **Reiniciar serviço específico:**
+```bash
+docker-compose restart <service-name>
+```
+
+3. **Reconstruir serviços:**
+```bash
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+### Verificação de Métricas
+
+1. **Prometheus Targets:**
+   - Acesse: http://localhost:9090/targets
+   - Verifique status dos endpoints
+
+2. **Grafana Datasources:**
+   - Acesse: http://localhost:3000/datasources
+   - Verifique conexão com Prometheus
+
+3. **Métricas em Tempo Real:**
+   - Dashboard principal do Grafana
+   - Alertas configurados
+   - Histórico de performance
