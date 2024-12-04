@@ -103,8 +103,7 @@ async def startup_event():
     try:
         prometheus_port = int(os.getenv("PROMETHEUS_PORT", 8000))
         start_http_server(prometheus_port)
-        logger.info(f"Servidor de monitoramento iniciado na porta {
-                    prometheus_port}")
+        logger.info(f"Servidor de monitoramento iniciado na porta {prometheus_port}")
     except Exception as e:
         logger.error(f"Erro ao iniciar servidor de monitoramento: {str(e)}")
 

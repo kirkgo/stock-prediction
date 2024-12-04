@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   api:
     build:
@@ -8,15 +6,18 @@ services:
     container_name: stock-prediction-api
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "8001:8001"
     volumes:
       - ./models:/app/models
+      - ./src:/app/src
+      - ./scripts:/app/scripts
     environment:
       - PROMETHEUS_PORT=8000
+      - API_PORT=8001
       - MODEL_CACHE_SIZE=5
       - LOG_LEVEL=INFO
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -45,6 +46,11 @@ services:
       - "--web.console.templates=/usr/share/prometheus/consoles"
     ports:
       - "9090:9090"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   grafana:
     image: grafana/grafana:latest
@@ -82,3 +88,5 @@ services:
 volumes:
   prometheus_data:
   grafana_data:
+  model_cache:
+

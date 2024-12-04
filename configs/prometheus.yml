@@ -13,16 +13,16 @@ alerting:
           # - alertmanager:9093
 
 scrape_configs:
-  - job_name: 'stock-prediction-api'
-    metrics_path: '/metrics'
+  - job_name: "stock-prediction-api"
+    metrics_path: "/metrics"
     static_configs:
-      - targets: ['api:8000']
+      - targets: ["api:8080"]
     scrape_interval: 10s
 
-  - job_name: 'prometheus'
+  - job_name: "prometheus"
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ["localhost:9090"]
 
-  - job_name: 'node-exporter'
+  - job_name: "node-exporter"
     static_configs:
-      - targets: ['node-exporter:9100']
+      - targets: ["node-exporter:9100"]
